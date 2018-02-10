@@ -1,6 +1,3 @@
-import graphviz
-from heapviz import *
-
 class BinaryHeap:
     """
     An implementation of a binary heap using a list.
@@ -140,25 +137,6 @@ class BinaryHeap:
 
             index = min_child
 
-def heapsort(items):
-    """
-    Returns the sorted list of items.
-
-    >>> heapsort([5,4,2,1,2,3])
-    [1, 2, 2, 3, 4, 5]
-    >>> heapsort([1])
-    [1]
-    >>> heapsort([])
-    []
-    """
-
-    heap = BinaryHeap()
-    for x in items:
-        heap.insert(None, x)
-    sorted = []
-    while heap:
-        sorted.append(heap.popmin()[1])
-    return sorted
 
 if __name__ == "__main__":
     import doctest
@@ -170,7 +148,3 @@ if __name__ == "__main__":
     heap.insert("dog", 1)
     heap.insert("pig", 2)
     heap.popmin()
-
-    dot = heapviz(heap)
-
-    dot.render(view=True)

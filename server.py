@@ -48,28 +48,73 @@ def load_edmonton_graph(filename):
 
     return g, location
 
+
+def get_path(reached, start, end):
+  """
+  Return a path from start to end, given a search tree.
+
+  reached:
+    A dictionary representing a search tree of a search
+    initiated from the vertex "start".
+  start:
+    The vertex that was the start of the search that constructed
+    the search tree
+  end:
+    The desired endpoint of the search
+
+  Returns a list of vertices starting at vertex start and ending at vertex end
+  representing a path between these vertices (the path in the search tree).
+  If the vertex "end" was not reached (i.e. is not a key in reached),
+  this simply returns the empty list []
+
+  # the example in the docstring test is the search tree run on the graph
+  # drawn using graphviz above, starting from vertex 3
+
+  >>> reached = {3:3, 1:3, 4:3, 2:4}
+  >>> get_path(reached, 3, 2)
+  [3, 4, 2]
+  >>> get_path(reached, 3, 3)
+  [3]
+  >>> get_path(reached, 3, 5)
+  []
+  """
+
+  if end not in reached:
+    return []
+
+  path = [end]
+
+  while end != start:
+    end = reached[end]
+    path.append(end)
+
+  path.reverse()
+
+  return path
+
+
 # Should also be done, haven't tested
 class CostDistance:
     """
     A class with a method called distance that will return the Euclidean between two given vertices.
     """
-    locations = dict()
 
     def __init__(self, location):
         """
         Creates an instance of the CostDistance class and stores the dictionary "location"
         as a member of this class.
         """
-        locations = location
+        self.locations = location
 
     def distance(self, e):
         """
         Here e is a pair (u,v) of vertices.
         Returns the Euclidean distance between the two vertices u and v.
         """
-        start, end = locations[e[0]], locations[e[1]]
+        start, end = self.locations[e[0]], self.locations[e[1]]
         xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
+
 
 def least_cost_path(graph, start, dest, cost):
     """
@@ -87,3 +132,16 @@ def least_cost_path(graph, start, dest, cost):
                     vertex is always start, the last is always dest in the list.
                     Any two consecutive vertices correspond to some edge in graph.
     """
+    events = BinaryHeap()
+    reached = dict()
+    events.insert((start,start), 0)
+
+    while(events):
+        edge, time = events.popmin()
+        if edge[1] not in reached:
+            reached[edge[1]] = edge[0]
+            for w in graph.neighbours(edge[1]):
+                fuse = cost.distance((edge[1], w))
+                events.insert(((edge[1]), w), (time + fuse))
+
+    return get_path(reached, start, dest)
