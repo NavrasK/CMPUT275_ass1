@@ -1,4 +1,6 @@
-import graph
+import math  # For math.sqrt()
+from graph import Graph
+from binary_heap import BinaryHeap
 
 # Should be done, I used my solution from exercise 2 and added the location
 # dict that they asked for in the description
@@ -32,8 +34,10 @@ def load_edmonton_graph(filename):
 
         # Depending on the first character, treat input as vertex or edge
         if line[0] == 'V':
+            # Add the vertex to the graph, and store the coordinates of the vertex
             g.add_vertex(line[1])
-            location[int(line[1])] = (line[2], line[3])
+            coords = (int(float(line[2]) * 100000), int(float(line[3]) * 100000))
+            location[int(line[1])] = coords
 
         if line[0] == 'E':
             # Add both directions of each edge
@@ -44,23 +48,28 @@ def load_edmonton_graph(filename):
 
     return g, location
 
-
-
+# Should also be done, haven't tested
 class CostDistance:
     """
-    A class with a method called distance that will return the Euclidean
-    between two given vertices.
+    A class with a method called distance that will return the Euclidean between two given vertices.
     """
+    locations = dict()
+
     def __init__(self, location):
         """
-        Creates an instance of the CostDistance class and stores the 3 dictionary "location" as a member of this class.
+        Creates an instance of the CostDistance class and stores the dictionary "location"
+        as a member of this class.
         """
+        locations = location
+
     def distance(self, e):
         """
         Here e is a pair (u,v) of vertices.
         Returns the Euclidean distance between the two vertices u and v.
         """
-
+        start, end = locations[e[0]], locations[e[1]]
+        xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
+        return math.sqrt(xdiff + ydiff)
 
 def least_cost_path(graph, start, dest, cost):
     """
