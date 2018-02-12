@@ -159,7 +159,7 @@ def minDist(location, start, end):
     tempStartDist = float('inf')
     tempEndDist = float('inf')
     for k in location:
-        ds = math.sqrt((location[k][0]-start[0])**2 + (location[k][1]-start[1])**2)
+        ds = math.sqrt((location[k][0]-start[0])**2 + (location[k][1]-start[1])**2) #delta(d) = sqrt((distanceX)^2+(distanceY)^2)
         de = math.sqrt((location[k][0]-end[0])**2 + (location[k][1]-end[1])**2)
         if ds < tempStartDist: 
             tempStartDist = ds
@@ -174,8 +174,6 @@ if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
     request = input()
     request = request.split(' ')
-    startKey = -1
-    endKey = -1
     if request[0] != "R":
         raise InputError('Invalid request format.')
     else:
