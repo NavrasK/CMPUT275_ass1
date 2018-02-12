@@ -160,22 +160,46 @@ if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
     request = input()
     request = request.split(' ')
+    startKey = -1
+    endKey = -1
     if request[0] != "R":
         raise InputError('Invalid request format.')
     else:
-        start[0] = float(request[1])*10**-100000
-        start[1] = float(request[2])*10**-100000
-        end[0] = float(request[3])*10**-100000
-        end[1] = float(request[4])*10**-100000
+        #print("s: ", request[1], ", ", request[2])
+        #print("s: ", float(request[1]), ", ", float(request[2]))
+        start = (float(request[1])/1000000, float(request[2])/1000000)
+        #print("s: ", start[0], ", ", start[1])
+        end = (float(request[3])/1000000, float(request[4])/1000000)
+        #print("e: ", end[0], ", ", end[1])
         #TODO Figure out how to find the closest value in the dict if it isn't exact
-        tempStart = (float('inf'),float('inf'))
-        tempEnd = (float('inf'),float('inf'))
-        if (start[0],start[1]) in locations.values():
-            tempStart = (0,0)
-        if (end[0],end[1]) in locations.value():
-            tempEnd = (0,0)
-        if tempStart != (0,0) and tempEnd != (0,0):
-            for pair in location:
-                print('test')
+        tempStart = [float('inf'),float('inf')]
+        tempEnd = [float('inf'),float('inf')]
+        if (start[0],start[1]) not in location.values() or (end[0],end[1]) not in location.values():
+            for k in location:
+                ds = math.sqrt((location[k][0]-start[0])**2 + (location[k][1]-start[1])**2)
+                de = math.sqrt((location[k][0]-end[0])**2 + (location[k][1]-end[1])**2)
+                if ds < math.sqrt(tempStart[0]**2 + tempStart[1]**2): #check if net distance is smaller than previous
+                    print("s ", start[0], " -> ", tempStart[0],", ",start[1], " -> ", tempStart[1])
+                    tempStart[0] = abs(location[k][0]-start[0])
+                    tempStart[1] = abs(location[k][1]-start[1])
+                    print("s ", start[0], " -> ", tempStart[0],", ",start[1], " -> ", tempStart[1])
+                    startKey = k
+                    print("skey=",startKey)
+                if de < math.sqrt(tempEnd[0]**2 + tempEnd[1]**2): #check if net distance is smaller than previous
+                    print("e ", end[0], " -> ", tempEnd[0],", ",end[1], " -> ", tempEnd[1])
+                    tempEnd[0] = abs(location[k][0]-end[0])
+                    tempEnd[1] = abs(location[k][1]-end[1])
+                    print("e ", end[0], " -> ", tempEnd[0],", ",end[1], " -> ", tempEnd[1])
+                    endKey = k
+                    print("ekey=",endKey)
+        else:
+            startKey = list(location.keys())[list(location.values()).index((start[0],start[1]))]
+            endKey = list(location.keys())[list(location.values()).index((end[0],end[1]))]
+        print("start: ", startKey)
+        print("end: ", endKey)
 
-#R 5365486 -11333915 5364728 -11335891
+
+
+    #R 5365486 -11333915 5364728 -11335891
+    #R 53430996 -113491331 53461225 -113617217
+    #^ 29577354 36397020
