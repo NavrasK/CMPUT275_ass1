@@ -145,3 +145,11 @@ def least_cost_path(graph, start, dest, cost):
                 events.insert(((edge[1]), w), (time + fuse))
 
     return get_path(reached, start, dest)
+
+
+if __name__ == "__main__":
+    edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
+    request = input()
+    request = request.split(' ')
+    if request[0] != "R":
+        raise InputError('Invalid request format.')
