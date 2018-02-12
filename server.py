@@ -1,6 +1,9 @@
 import math  # For math.sqrt()
 from graph import Graph
 from binary_heap import BinaryHeap
+import sys
+import collections
+import bisect
 
 # Should be done, I used my solution from exercise 2 and added the location
 # dict that they asked for in the description
@@ -147,9 +150,32 @@ def least_cost_path(graph, start, dest, cost):
     return get_path(reached, start, dest)
 
 
+def checkRcpt():
+    rcpt = input()
+    if rcpt != "A":
+        raise InputError('Invalid Receipt')
+
+
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
     request = input()
     request = request.split(' ')
     if request[0] != "R":
         raise InputError('Invalid request format.')
+    else:
+        start[0] = float(request[1])*10**-100000
+        start[1] = float(request[2])*10**-100000
+        end[0] = float(request[3])*10**-100000
+        end[1] = float(request[4])*10**-100000
+        #TODO Figure out how to find the closest value in the dict if it isn't exact
+        tempStart = (float('inf'),float('inf'))
+        tempEnd = (float('inf'),float('inf'))
+        if (start[0],start[1]) in locations.values():
+            tempStart = (0,0)
+        if (end[0],end[1]) in locations.value():
+            tempEnd = (0,0)
+        if tempStart != (0,0) and tempEnd != (0,0):
+            for pair in location:
+                print('test')
+
+#R 5365486 -11333915 5364728 -11335891
