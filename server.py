@@ -164,6 +164,8 @@ def minDist(location, start, end):
         if ds < tempStartDist: 
             tempStartDist = ds
             startKey = k
+            print("S: ",startKey)
+            print("    V")
         if de < tempEndDist:
             tempEndDist = de
             endKey = k
