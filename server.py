@@ -94,8 +94,8 @@ def checkRcpt():
     rcpt = input()
     if rcpt != "A":
         raise inputError('Invalid Receipt')
-    else:
-        return True
+
+    return True
 
 
 if __name__ == "__main__":
