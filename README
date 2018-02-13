@@ -1,2 +1,22 @@
-# CMPUT275_ass1
-Edmonton Map for CMPUT 275
+Driving Route Finder (Python Pathfinding)
+CMPUT 275 Assignment 1 Part 1
+
+DESCRIPTION
+	This code implments Dijkstra's Pathfinding Algorithm in Python3 in order to simulate the use of a GPS system.
+	The user can input a start and end point they would like to take by entering their query in the form:
+		R [starting coordinate pair, accurate to 6 decimal places and then multiplied by 1000000] [ending coordinate pair, in the same format as before]
+	The server will then return the number of waypoints needed to get from the nearest vertex on the map to the start position to the nearest vertex on the map to the end position.  
+	The client will send the character "A" to demonstrate that they have recieved the data.  The server will wait until the client responds, but it will not continue if given an incorrect reciept character.  
+	The server will then return the paths to take one at a time, and will wait between each for the client to respond as above. 
+	At the end of the transmission the server will return the code "E", then the code will exit.  
+
+TO RUN THE CODE
+	Unzip the folder
+	Open terminal to the unzipped directory
+	Type python3 server.py
+
+NOTE
+	Implements code created by TAs and instructors of the course (from eClass)
+
+Created by Jesse Goertzen (1505959) Navras Kamal (1505463)
+February 2018

@@ -1,5 +1,5 @@
 #   Assignment 1 Part 1
-#   By Jesse Goertzen (1505959) and Navras Kamal [ID]
+#   By Jesse Goertzen (1505959) and Navras Kamal (1505463)
 
 import math  # For math.sqrt()
 from graph import Graph
@@ -94,8 +94,8 @@ def checkRcpt():
     rcpt = input()
     if rcpt != "A":
         raise inputError('Invalid Receipt')
-
-    return True
+    else:
+        return True
 
 
 if __name__ == "__main__":
