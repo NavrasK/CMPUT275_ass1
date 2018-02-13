@@ -1,3 +1,5 @@
+# Removed the heapviz and related imports to clean up the file, no other changes made
+
 class BinaryHeap:
     """
     An implementation of a binary heap using a list.

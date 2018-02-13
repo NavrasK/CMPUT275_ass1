@@ -1,29 +1,13 @@
+#   Assignment 1 Part 1
+#   By Jesse Goertzen (1505959) and Navras Kamal [ID]
+
 import math  # For math.sqrt()
 from graph import Graph
 from binary_heap import BinaryHeap
-import sys
-import collections
-import bisect
 
-# Should be done, I used my solution from exercise 2 and added the location
-# dict that they asked for in the description
+
+# Modified solution to Exercise 3 by Jesse Goertzen
 def load_edmonton_graph(filename):
-    """
-    Description:
-        Loads the graph of Edmonton from the given file.
-        Returns two items
-        graph: the instance of the class Graph() corresponding to the
-        directed graph from edmonton-roads-2.0.1.txt
-        location: a dictionary mapping the identifier of a vertex to
-        the pair (lat, lon) of geographic coordinates for that vertex.
-        These should be integers measuring the lat/lon in 100000-ths
-        of a degree.
-        In particular, the return statement in your code should be
-        return graph, location
-        (or whatever name you use for the variables).
-        Note: the vertex identifiers should be converted to integers
-        before being added to the graph and the dictionary.
-    """
     g = Graph()
     location = dict()
 
@@ -36,14 +20,13 @@ def load_edmonton_graph(filename):
         line = line.split(',')
 
         # Depending on the first character, treat input as vertex or edge
-        if line[0] == 'V':
+        if line[0] == 'V':  # Vertex
             # Add the vertex to the graph, and store the coordinates of the vertex
             g.add_vertex(int(line[1]))
             coords = (int(float(line[2]) * 100000), int(float(line[3]) * 100000))
             location[int(line[1])] = coords
 
-        if line[0] == 'E':
-            # Add both directions of each edge
+        if line[0] == 'E':  # Edge
             g.add_edge((int(line[1]), int(line[2])))
 
     # Don't forget to close the file!
@@ -53,189 +36,104 @@ def load_edmonton_graph(filename):
 
 
 def get_path(reached, start, end):
-    """
-    Return a path from start to end, given a search tree.
-
-    reached:
-    A dictionary representing a search tree of a search
-    initiated from the vertex "start".
-    start:
-    The vertex that was the start of the search that constructed
-    the search tree
-    end:
-    The desired endpoint of the search
-
-    Returns a list of vertices starting at vertex start and ending at vertex end
-    representing a path between these vertices (the path in the search tree).
-    If the vertex "end" was not reached (i.e. is not a key in reached),
-    this simply returns the empty list []
-
-    # the example in the docstring test is the search tree run on the graph
-    # drawn using graphviz above, starting from vertex 3
-
-    >>> reached = {3:3, 1:3, 4:3, 2:4}
-    >>> get_path(reached, 3, 2)
-    [3, 4, 2]
-    >>> get_path(reached, 3, 3)
-    [3]
-    >>> get_path(reached, 3, 5)
-    []
-    """
+    #  get_path function provided in the useful functions tar file
 
     if end not in reached:
-        return []
+        return []  # unreachable
 
+    # Build the path in reverse order, starting at the end
     path = [end]
 
     while end != start:
-        end = reached[end]
-        path.append(end)
+        end = reached[end]  # step to the vertex old end was reached by
+        path.append(end)  # add to the path
 
-        path.reverse()
-        print(path)
-        return path
+    path.reverse()  # reverse the path to go from start to end
+    return path
 
 
-# Should also be done, haven't tested
 class CostDistance:
-    """
-    A class with a method called distance that will return the Euclidean between two given vertices.
-    """
-
+    # Class used to store the location dict which contains the coordinates of each vertex
     def __init__(self, location):
-        """
-        Creates an instance of the CostDistance class and stores the dictionary "location"
-        as a member of this class.
-        """
+        # Initialize an instance of the class with the locations of the graph
         self.locations = location
 
+    # e is a pair of vertices (u, v)
+    # return the Euclidean distance between the two
     def distance(self, e):
-        """
-        Here e is a pair (u,v) of vertices.
-        Returns the Euclidean distance between the two vertices u and v.
-        """
-        start, end = self.locations[e[0]], self.locations[e[1]]
+        start, end = self.locations[e[0]], self.locations[e[1]]  # Get coordinates of start and end
         xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
 
-    def anyDist(self, v, r):
+    # distance from an arbitrary point to a vertex in the graph
+    # v is a key for a vertex in the graph, r is a tuple of coordinates
+    def dist2Vertex(self, v, r):
         start, end = r, self.locations[v]
         xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
 
 
 def least_cost_path(graph, start, dest, cost):
-    """
-    Find and return a least cost path in graph from start vertex to dest vertex.
-    Details:
-        Efficiency: If E is the number of edges, the run-time is O( E log(E) ).
-        Args:
-            graph (Graph): The digraph defining the edges between the vertices.
-            start: The vertex where the path starts. It is assumed that start is a vertex of graph.
-            dest: The vertex where the path ends. It is assumed that dest is a vertex of graph.
-            cost: A class with a method called "distance" that takes as input an edge (a pair of vertices)
-            and returns the cost of the edge. For more details, see the CostDistance class description below.
-        Returns:
-            list: A potentially empty list (if no path can be found) of the vertices in the graph. If there was a path, the first
-                    vertex is always start, the last is always dest in the list.
-                    Any two consecutive vertices correspond to some edge in graph.
-    """
+    # Implementation of Dijkstra's algorithm
     events = BinaryHeap()
     reached = dict()
-    events.insert((start, start), 0)
+    events.insert((start, start), 0)  # Begin at time 0, at the start vertex
 
     while events:
-        edge, time = events.popmin()
-        if edge[1] not in reached:
-            reached[edge[1]] = edge[0]
-            for w in graph.neighbours(edge[1]):
-                fuse = cost.distance((edge[1], w))
-                events.insert(((edge[1]), w), (time + fuse))
+        edge, time = events.popmin()  # Get next burnt vertex
+        if edge[1] not in reached:  # If the destination is not been reached
+            reached[edge[1]] = edge[0]  # Keep track of where we came from
+            for w in graph.neighbours(edge[1]):  # Burn the neighbours!!!!
+                events.insert(((edge[1]), w), (time + cost.distance((edge[1], w))))  # Add the fuse
 
-    # print(reached)
-    return get_path(reached, start, dest)
+    return get_path(reached, start, dest)  # return the path
 
 
+# Simple function to check the validity of the acknowledgement from the user/arduino
 def checkRcpt():
     rcpt = input()
     if rcpt != "A":
-        raise InputError('Invalid Receipt')
+        raise inputError('Invalid Receipt')
 
-<<<<<<< HEAD
-def minDist(location, start, end):
-    tempStartDist = float('inf')
-    tempEndDist = float('inf')
-    for k in location:
-        ds = math.sqrt((location[k][0]-start[0])**2 + (location[k][1]-start[1])**2)
-        de = math.sqrt((location[k][0]-end[0])**2 + (location[k][1]-end[1])**2)
-        if ds < tempStartDist: 
-            tempStartDist = ds
-            startKey = k
-        if de < tempEndDist:
-            tempEndDist = de
-            endKey = k
-    return startKey, endKey
-
-=======
     return True
->>>>>>> 628ac402128065913f6a2fe361073da1095aea00
 
 
 if __name__ == "__main__":
+    # Load the graph and read the input request
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
     request = input()
     request = request.split(' ')
-<<<<<<< HEAD
-    startKey = -1
-    endKey = -1
-    if request[0] != "R":
-        raise InputError('Invalid request format.')
-    else:
-        start = (float(request[1])/1000000, float(request[2])/1000000)
-        end = (float(request[3])/1000000, float(request[4])/1000000)
-        #TODO Figure out how to find the closest value in the dict if it isn't exact
-        startKey, endKey = minDist(location, start, end)
-        print("start: ", startKey)
-        print("end: ", endKey)
-
-
-
-    #R 5365486 -11333915 5364728 -11335891
-    #R 53430996 -113491331 53461225 -113617217
-    #^ 29577354 36397020
-=======
     cost = CostDistance(location)
 
+    # Ensure a valid request
     if request[0] != "R":
-        raise InputError('Invalid request format.')
+        raise inputError('Invalid request format.')
 
-    start = int(request[1]), int(request[2])
-    end = int(request[3]), int(request[4])
+    # Read coordinates of the start and destination
+    start = (int(request[1]), int(request[2]))
+    end = (int(request[3]), int(request[4]))
 
     minStart, minEnd = float('inf'), float('inf')
     startKey, endKey = -1, -1
 
+    # Find the nearest vertex to the start and destination request
     for v in location:
-        diffStart = cost.anyDist(v, start)
+        diffStart, diffEnd = cost.dist2Vertex(v, start), cost.dist2Vertex(v, end)
         if diffStart < minStart:
             minStart, startKey = diffStart, v
-
-    for v in location:
-        diffEnd = cost.anyDist(v, end)
         if diffEnd < minEnd:
             minEnd, endKey = diffEnd, v
 
-
-    # print(location[startKey], location[endKey])
+    # Find the shortest path
     path = least_cost_path(edmonton_graph, startKey, endKey, cost)
 
     print('N', len(path))
-    path.reverse()
+    path.reverse()  # reverse to make use of path.pop()
+
     while path:
-        if not checkRcpt():
+        if not checkRcpt():  # break if acknowledgement is invalid
             break
         waypoint = path.pop()
         print('W', location[waypoint][0], location[waypoint][1])
 
     print('E')
->>>>>>> 628ac402128065913f6a2fe361073da1095aea00
