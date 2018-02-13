@@ -38,13 +38,13 @@ def load_edmonton_graph(filename):
         # Depending on the first character, treat input as vertex or edge
         if line[0] == 'V':
             # Add the vertex to the graph, and store the coordinates of the vertex
-            g.add_vertex(line[1])
+            g.add_vertex(int(line[1]))
             coords = (int(float(line[2]) * 100000), int(float(line[3]) * 100000))
             location[int(line[1])] = coords
 
         if line[0] == 'E':
             # Add both directions of each edge
-            g.add_edge((line[1], line[2]))
+            g.add_edge((int(line[1]), int(line[2])))
 
     # Don't forget to close the file!
     graphFile.close()
@@ -53,47 +53,47 @@ def load_edmonton_graph(filename):
 
 
 def get_path(reached, start, end):
-  """
-  Return a path from start to end, given a search tree.
+    """
+    Return a path from start to end, given a search tree.
 
-  reached:
+    reached:
     A dictionary representing a search tree of a search
     initiated from the vertex "start".
-  start:
+    start:
     The vertex that was the start of the search that constructed
     the search tree
-  end:
+    end:
     The desired endpoint of the search
 
-  Returns a list of vertices starting at vertex start and ending at vertex end
-  representing a path between these vertices (the path in the search tree).
-  If the vertex "end" was not reached (i.e. is not a key in reached),
-  this simply returns the empty list []
+    Returns a list of vertices starting at vertex start and ending at vertex end
+    representing a path between these vertices (the path in the search tree).
+    If the vertex "end" was not reached (i.e. is not a key in reached),
+    this simply returns the empty list []
 
-  # the example in the docstring test is the search tree run on the graph
-  # drawn using graphviz above, starting from vertex 3
+    # the example in the docstring test is the search tree run on the graph
+    # drawn using graphviz above, starting from vertex 3
 
-  >>> reached = {3:3, 1:3, 4:3, 2:4}
-  >>> get_path(reached, 3, 2)
-  [3, 4, 2]
-  >>> get_path(reached, 3, 3)
-  [3]
-  >>> get_path(reached, 3, 5)
-  []
-  """
+    >>> reached = {3:3, 1:3, 4:3, 2:4}
+    >>> get_path(reached, 3, 2)
+    [3, 4, 2]
+    >>> get_path(reached, 3, 3)
+    [3]
+    >>> get_path(reached, 3, 5)
+    []
+    """
 
-  if end not in reached:
-    return []
+    if end not in reached:
+        return []
 
-  path = [end]
+    path = [end]
 
-  while end != start:
-    end = reached[end]
-    path.append(end)
+    while end != start:
+        end = reached[end]
+        path.append(end)
 
-  path.reverse()
-
-  return path
+        path.reverse()
+        print(path)
+        return path
 
 
 # Should also be done, haven't tested
@@ -120,7 +120,7 @@ class CostDistance:
 
     def anyDist(self, v, r):
         start, end = r, self.locations[v]
-        xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2
+        xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
 
 
@@ -142,9 +142,9 @@ def least_cost_path(graph, start, dest, cost):
     """
     events = BinaryHeap()
     reached = dict()
-    events.insert((start,start), 0)
+    events.insert((start, start), 0)
 
-    while(events):
+    while events:
         edge, time = events.popmin()
         if edge[1] not in reached:
             reached[edge[1]] = edge[0]
@@ -152,6 +152,7 @@ def least_cost_path(graph, start, dest, cost):
                 fuse = cost.distance((edge[1], w))
                 events.insert(((edge[1]), w), (time + fuse))
 
+    # print(reached)
     return get_path(reached, start, dest)
 
 
@@ -178,6 +179,7 @@ def minDist(location, start, end):
 =======
     return True
 >>>>>>> 628ac402128065913f6a2fe361073da1095aea00
+
 
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
@@ -206,24 +208,31 @@ if __name__ == "__main__":
 
     if request[0] != "R":
         raise InputError('Invalid request format.')
-    start = (request[1], request[2])
-    end = (request[3], request[4])
+
+    start = int(request[1]), int(request[2])
+    end = int(request[3]), int(request[4])
+
     minStart, minEnd = float('inf'), float('inf')
     startKey, endKey = -1, -1
 
-    for v in locations:
-        diffStart, diffEnd= cost.anyDist(v, start), cost.anyDist(v, end)
+    for v in location:
+        diffStart = cost.anyDist(v, start)
         if diffStart < minStart:
             minStart, startKey = diffStart, v
+
+    for v in location:
+        diffEnd = cost.anyDist(v, end)
         if diffEnd < minEnd:
             minEnd, endKey = diffEnd, v
 
+
+    # print(location[startKey], location[endKey])
     path = least_cost_path(edmonton_graph, startKey, endKey, cost)
 
     print('N', len(path))
-    path = path.reverse()
+    path.reverse()
     while path:
-        if !checkRcpt():
+        if not checkRcpt():
             break
         waypoint = path.pop()
         print('W', location[waypoint][0], location[waypoint][1])
