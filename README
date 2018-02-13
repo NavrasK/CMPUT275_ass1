@@ -17,6 +17,9 @@ TO RUN THE CODE
 
 NOTE
 	Implements code created by TAs and instructors of the course (from eClass)
+		- graph.py
+		- binary_heap.py: modified slightly to remove heapviz imports and related functions. No functionality changes.
+		- get_path() from breadth_first_search.py
 
 Created by Jesse Goertzen (1505959) Navras Kamal (1505463)
 February 2018
