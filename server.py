@@ -118,6 +118,11 @@ class CostDistance:
         xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
 
+    def anyDist(self, v, r):
+        start, end = r, self.locations[v]
+        xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2
+        return math.sqrt(xdiff + ydiff)
+
 
 def least_cost_path(graph, start, dest, cost):
     """
@@ -155,6 +160,7 @@ def checkRcpt():
     if rcpt != "A":
         raise InputError('Invalid Receipt')
 
+<<<<<<< HEAD
 def minDist(location, start, end):
     tempStartDist = float('inf')
     tempEndDist = float('inf')
@@ -169,11 +175,15 @@ def minDist(location, start, end):
             endKey = k
     return startKey, endKey
 
+=======
+    return True
+>>>>>>> 628ac402128065913f6a2fe361073da1095aea00
 
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
     request = input()
     request = request.split(' ')
+<<<<<<< HEAD
     startKey = -1
     endKey = -1
     if request[0] != "R":
@@ -191,3 +201,32 @@ if __name__ == "__main__":
     #R 5365486 -11333915 5364728 -11335891
     #R 53430996 -113491331 53461225 -113617217
     #^ 29577354 36397020
+=======
+    cost = CostDistance(location)
+
+    if request[0] != "R":
+        raise InputError('Invalid request format.')
+    start = (request[1], request[2])
+    end = (request[3], request[4])
+    minStart, minEnd = float('inf'), float('inf')
+    startKey, endKey = -1, -1
+
+    for v in locations:
+        diffStart, diffEnd= cost.anyDist(v, start), cost.anyDist(v, end)
+        if diffStart < minStart:
+            minStart, startKey = diffStart, v
+        if diffEnd < minEnd:
+            minEnd, endKey = diffEnd, v
+
+    path = least_cost_path(edmonton_graph, startKey, endKey, cost)
+
+    print('N', len(path))
+    path = path.reverse()
+    while path:
+        if !checkRcpt():
+            break
+        waypoint = path.pop()
+        print('W', location[waypoint][0], location[waypoint][1])
+
+    print('E')
+>>>>>>> 628ac402128065913f6a2fe361073da1095aea00
