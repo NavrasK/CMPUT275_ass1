@@ -1,26 +1,16 @@
+#   Assignment 1 Part 1
+#   By Jesse Goertzen (1505959) and Navras Kamal (1505463)
+
 import math  # For math.sqrt()
 from graph import Graph
 from binary_heap import BinaryHeap
+from serial import Serial
+from time import sleep
+from enum import Enum, auto
 
-# Should be done, I used my solution from exercise 2 and added the location
-# dict that they asked for in the description
+
+# Modified solution to Exercise 3 by Jesse Goertzen
 def load_edmonton_graph(filename):
-    """
-    Description:
-        Loads the graph of Edmonton from the given file.
-        Returns two items
-        graph: the instance of the class Graph() corresponding to the
-        directed graph from edmonton-roads-2.0.1.txt
-        location: a dictionary mapping the identifier of a vertex to
-        the pair (lat, lon) of geographic coordinates for that vertex.
-        These should be integers measuring the lat/lon in 100000-ths
-        of a degree.
-        In particular, the return statement in your code should be
-        return graph, location
-        (or whatever name you use for the variables).
-        Note: the vertex identifiers should be converted to integers
-        before being added to the graph and the dictionary.
-    """
     g = Graph()
     location = dict()
 
@@ -33,15 +23,14 @@ def load_edmonton_graph(filename):
         line = line.split(',')
 
         # Depending on the first character, treat input as vertex or edge
-        if line[0] == 'V':
+        if line[0] == 'V':  # Vertex
             # Add the vertex to the graph, and store the coordinates of the vertex
-            g.add_vertex(line[1])
+            g.add_vertex(int(line[1]))
             coords = (int(float(line[2]) * 100000), int(float(line[3]) * 100000))
             location[int(line[1])] = coords
 
-        if line[0] == 'E':
-            # Add both directions of each edge
-            g.add_edge((line[1], line[2]))
+        if line[0] == 'E':  # Edge
+            g.add_edge((int(line[1]), int(line[2])))
 
     # Don't forget to close the file!
     graphFile.close()
@@ -50,106 +39,132 @@ def load_edmonton_graph(filename):
 
 
 def get_path(reached, start, end):
-  """
-  Return a path from start to end, given a search tree.
+    #  get_path function provided in the useful functions tar file
 
-  reached:
-    A dictionary representing a search tree of a search
-    initiated from the vertex "start".
-  start:
-    The vertex that was the start of the search that constructed
-    the search tree
-  end:
-    The desired endpoint of the search
+    if end not in reached:
+        return []  # unreachable
 
-  Returns a list of vertices starting at vertex start and ending at vertex end
-  representing a path between these vertices (the path in the search tree).
-  If the vertex "end" was not reached (i.e. is not a key in reached),
-  this simply returns the empty list []
+    # Build the path in reverse order, starting at the end
+    path = [end]
 
-  # the example in the docstring test is the search tree run on the graph
-  # drawn using graphviz above, starting from vertex 3
+    while end != start:
+        end = reached[end]  # step to the vertex old end was reached by
+        path.append(end)  # add to the path
 
-  >>> reached = {3:3, 1:3, 4:3, 2:4}
-  >>> get_path(reached, 3, 2)
-  [3, 4, 2]
-  >>> get_path(reached, 3, 3)
-  [3]
-  >>> get_path(reached, 3, 5)
-  []
-  """
-
-  if end not in reached:
-    return []
-
-  path = [end]
-
-  while end != start:
-    end = reached[end]
-    path.append(end)
-
-  path.reverse()
-
-  return path
+    path.reverse()  # reverse the path to go from start to end
+    return path
 
 
-# Should also be done, haven't tested
 class CostDistance:
-    """
-    A class with a method called distance that will return the Euclidean between two given vertices.
-    """
-
+    # Class used to store the location dict which contains the coordinates of each vertex
     def __init__(self, location):
-        """
-        Creates an instance of the CostDistance class and stores the dictionary "location"
-        as a member of this class.
-        """
+        # Initialize an instance of the class with the locations of the graph
         self.locations = location
 
+    # e is a pair of vertices (u, v)
+    # return the Euclidean distance between the two
     def distance(self, e):
-        """
-        Here e is a pair (u,v) of vertices.
-        Returns the Euclidean distance between the two vertices u and v.
-        """
-        start, end = self.locations[e[0]], self.locations[e[1]]
+        start, end = self.locations[e[0]], self.locations[e[1]]  # Get coordinates of start and end
+        xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
+        return math.sqrt(xdiff + ydiff)
+
+    # distance from an arbitrary point to a vertex in the graph
+    # v is a key for a vertex in the graph, r is a tuple of coordinates
+    def dist2Vertex(self, v, r):
+        start, end = r, self.locations[v]
         xdiff, ydiff = ((start[0] - end[0])**2), ((start[1] - end[1])**2)
         return math.sqrt(xdiff + ydiff)
 
 
 def least_cost_path(graph, start, dest, cost):
-    """
-    Find and return a least cost path in graph from start vertex to dest vertex.
-    Details:
-        Efficiency: If E is the number of edges, the run-time is O( E log(E) ).
-        Args:
-            graph (Graph): The digraph defining the edges between the vertices.
-            start: The vertex where the path starts. It is assumed that start is a vertex of graph.
-            dest: The vertex where the path ends. It is assumed that dest is a vertex of graph.
-            cost: A class with a method called "distance" that takes as input an edge (a pair of vertices)
-            and returns the cost of the edge. For more details, see the CostDistance class description below.
-        Returns:
-            list: A potentially empty list (if no path can be found) of the vertices in the graph. If there was a path, the first
-                    vertex is always start, the last is always dest in the list.
-                    Any two consecutive vertices correspond to some edge in graph.
-    """
+    # Implementation of Dijkstra's algorithm
     events = BinaryHeap()
     reached = dict()
-    events.insert((start,start), 0)
+    events.insert((start, start), 0)  # Begin at time 0, at the start vertex
 
-    while(events):
-        edge, time = events.popmin()
-        if edge[1] not in reached:
-            reached[edge[1]] = edge[0]
-            for w in graph.neighbours(edge[1]):
-                fuse = cost.distance((edge[1], w))
-                events.insert(((edge[1]), w), (time + fuse))
+    while events:
+        edge, time = events.popmin()  # Get next burnt vertex
+        if edge[1] not in reached:  # If the destination is not been reached
+            reached[edge[1]] = edge[0]  # Keep track of where we came from
+            for w in graph.neighbours(edge[1]):  # Burn the neighbours!!!!
+                events.insert(((edge[1]), w), (time + cost.distance((edge[1], w))))  # Add the fuse
 
-    return get_path(reached, start, dest)
+    return get_path(reached, start, dest)  # return the path
+
+
+# Function to find the nearest vertex to a location on the map
+def nearestVertex(req, location):
+    cost = CostDistance(location)  # considering moving this out of the function and into main
+    min = float('inf')
+    key = -1
+
+    # cycle through vertices, finding the nearest vertex
+    for v in location:
+        diff = cost.dist2Vertex(v, req)
+        if diff < min:
+            min, key = diff, v
+
+    return key
+
+
+# Read from the serial, formatting the string
+def serialIn():
+    with Serial("/dev/ttyACM0", baudrate=9600, timeout=1) as ser:
+        read = ser.readline().decode("ASCII").rstrip("\r\n").split(' ')
+    return read
+
+
+# Finite state machine that processes requests from the arduino client
+def finite_state_machine(edmonton_graph, location):
+    class states(Enum):
+        REQ = auto()  # Waiting on request
+        ACK = auto()  # Waiting on acknowledgement
+        END = auto()  # Send end key
+
+    state = states.REQ
+    path = []
+
+    with Serial("/dev/ttyACM0", baudrate=9600, timeout=1) as ser:
+        while True:
+            response = serialIn()
+
+            if state == states.REQ and response[0] == 'R':
+                # Read coordinates of the start and destination
+                start = (int(response[1]), int(response[2]))
+                end = (int(response[3]), int(response[4]))
+
+                # Find nearest vertices for the start and end points
+                startKey, endKey = nearestVertex(start, location), nearestVertex(end, location)
+
+                # Find the shortest path
+                path = least_cost_path(edmonton_graph, startKey, endKey, cost).reverse()
+
+                # Create formatted output string for the client
+                length = 'N ' + ' ' + str(len(path)) + '\n'
+                ser.write(length)
+
+                state = states.ACK  # Proceed to wait on acknowledgement
+
+                if len(path) == 0:  # Wait for another request if there is no path
+                    state = states.REQ
+
+            if state == states.ACK and response[0] == 'A':
+                if len(path) == 0:  # no more waypoints, send end notification
+                    state = states.END
+                    continue
+
+                next = path.pop()  # Get next waypoint
+
+                # Format output to the client
+                waypoint = 'W' + ' ' + str(location[next][0]) + ' ' + str(location[next][1]) + '\n'
+                ser.write(waypoint)
+
+            if state == states.END:
+                ser.write('E\n')
+                state = states.REQ
 
 
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
-    request = input()
-    request = request.split(' ')
-    if request[0] != "R":
-        raise InputError('Invalid request format.')
+
+    finite_state_machine(edmonton_graph, location)
