@@ -1,2 +1,2 @@
 # CMPUT275_ass1
-Edmonton Map
+Edmonton Map for CMPUT 275

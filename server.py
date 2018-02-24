@@ -4,10 +4,16 @@
 import math  # For math.sqrt()
 from graph import Graph
 from binary_heap import BinaryHeap
+<<<<<<< HEAD
 from serial import Serial
 from time import sleep
 from enum import Enum, auto
 
+=======
+import sys
+import collections
+import bisect
+>>>>>>> 9e32d33dd444c8e00e85368bb10d1fc633072330
 
 # Modified solution to Exercise 3 by Jesse Goertzen
 def load_edmonton_graph(filename):
@@ -164,7 +170,47 @@ def finite_state_machine(edmonton_graph, location):
                 state = states.REQ
 
 
+def checkRcpt():
+    rcpt = input()
+    if rcpt != "A":
+        raise InputError('Invalid Receipt')
+
+def minDist(location, start, end):
+    tempStartDist = float('inf')
+    tempEndDist = float('inf')
+    for k in location:
+        ds = math.sqrt((location[k][0]-start[0])**2 + (location[k][1]-start[1])**2) #delta(d) = sqrt((distanceX)^2+(distanceY)^2)
+        de = math.sqrt((location[k][0]-end[0])**2 + (location[k][1]-end[1])**2)
+        if ds < tempStartDist: 
+            tempStartDist = ds
+            startKey = k
+        if de < tempEndDist:
+            tempEndDist = de
+            endKey = k
+    return startKey, endKey
+
+
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
+<<<<<<< HEAD
 
     finite_state_machine(edmonton_graph, location)
+=======
+    request = input()
+    request = request.split(' ')
+    if request[0] != "R":
+        raise InputError('Invalid request format.')
+    else:
+        start = (float(request[1])/1000000, float(request[2])/1000000)
+        end = (float(request[3])/1000000, float(request[4])/1000000)
+        #TODO Figure out how to find the closest value in the dict if it isn't exact
+        startKey, endKey = minDist(location, start, end)
+        print("start: ", startKey)
+        print("end: ", endKey)
+
+
+
+    #R 5365486 -11333915 5364728 -11335891
+    #R 53430996 -113491331 53461225 -113617217
+    #^ 29577354 36397020
+>>>>>>> 9e32d33dd444c8e00e85368bb10d1fc633072330
