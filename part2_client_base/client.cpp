@@ -145,8 +145,29 @@ int main() {
         // and then communicate with the server to get the path
         end = get_cursor_lonlat();
 
-        // TODO: communicate with the server to get the waypoints
+        Serial.print("R ");
+        Serial.print(start.lon);
+        Serial.print(" ");
+        Serial.print(start.lat);
+        Serial.print(" ");
+        Serial.print(end.lon);
+        Serial.print(" ");
+        Serial.println(end.lat);
 
+        int time = millis()
+        while(true){
+            if(millis() > time + 10000) {
+                break;
+            }
+            if(Serial.available()){
+                char* message = Serial.read();
+                if(message[0] != "N") {
+                    break;
+                }
+
+                shared.num_waypoints =
+            }
+        }
         // now we have stored the path length in
         // shared.num_waypoints and the waypoints themselves in
         // the shared.waypoints[] array, switch back to asking for the

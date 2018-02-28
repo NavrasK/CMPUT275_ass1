@@ -6,7 +6,7 @@ from eClass and put them on your SD card (after unzipping them).
 TFT Display:
 
     The display pins are numbered left to right in this document when they are being viewed
-    with their labels showing rightside up. Note you do not require the touchscreen for this assignment,
+    with their labels showing rightside up. Note you do not re--quire the touchscreen for this assignment,
     so it is probably a lot easier to not wire the Y+/X+/Y-/X- pins.
 
     Display Pin     Arduino Mega Pin
