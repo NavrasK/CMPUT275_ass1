@@ -5,8 +5,7 @@ import math  # For math.sqrt()
 from graph import Graph
 from binary_heap import BinaryHeap
 from serial import Serial
-from time import sleep
-from enum import Enum, auto
+from enum import Enum
 
 
 # Modified solution to Exercise 3 by Jesse Goertzen
@@ -42,16 +41,19 @@ def get_path(reached, start, end):
     #  get_path function provided in the useful functions tar file
 
     if end not in reached:
-        return []  # unreachable
+        return []
 
-    # Build the path in reverse order, starting at the end
     path = [end]
 
-    while end != start:
-        end = reached[end]  # step to the vertex old end was reached by
-        path.append(end)  # add to the path
+    print(path)
 
-    path.reverse()  # reverse the path to go from start to end
+    while end != start:
+        end = reached[end]
+        path.append(end)
+
+    path.reverse()
+
+    print(path)
     return path
 
 
@@ -94,6 +96,7 @@ def least_cost_path(graph, start, dest, cost):
 
 # Function to find the nearest vertex to a location on the map
 def nearestVertex(req, location):
+    print("Finding new nearest vertex")
     cost = CostDistance(location)  # considering moving this out of the function and into main
     min = float('inf')
     key = -1
@@ -102,46 +105,59 @@ def nearestVertex(req, location):
     for v in location:
         diff = cost.dist2Vertex(v, req)
         if diff < min:
+            print(v)
             min, key = diff, v
 
     return key
 
 
-# Read from the serial, formatting the string
-def serialIn():
-    with Serial("/dev/ttyACM0", baudrate=9600, timeout=1) as ser:
-        read = ser.readline().decode("ASCII").rstrip("\r\n").split(' ')
-    return read
-
-
 # Finite state machine that processes requests from the arduino client
 def finite_state_machine(edmonton_graph, location):
+    cost = CostDistance(location)
+
     class states(Enum):
-        REQ = auto()  # Waiting on request
-        ACK = auto()  # Waiting on acknowledgement
-        END = auto()  # Send end key
+        REQ = 0  # Waiting on request
+        ACK = 1  # Waiting on acknowledgement
+        END = 2  # Send end key
 
     state = states.REQ
     path = []
 
     with Serial("/dev/ttyACM0", baudrate=9600, timeout=1) as ser:
         while True:
-            response = serialIn()
+            print("Attempting to read from serial.")
+            response = ser.readline().decode("ASCII").rstrip("\r\n").split(' ')
+            print("read from serial:", response)
 
             if state == states.REQ and response[0] == 'R':
                 # Read coordinates of the start and destination
                 start = (int(response[1]), int(response[2]))
                 end = (int(response[3]), int(response[4]))
-
+                print(start, end)
                 # Find nearest vertices for the start and end points
-                startKey, endKey = nearestVertex(start, location), nearestVertex(end, location)
+                # startKey, endKey = nearestVertex(start, location), nearestVertex(end, location)
+                
+                minStart, minEnd = float('inf'), float('inf')
+                startKey, endKey = -1, -1
 
+                # Find the nearest vertex to the start and destination request
+                for v in location:
+                    diffStart, diffEnd = cost.dist2Vertex(v, start), cost.dist2Vertex(v, end)
+                    if diffStart < minStart:
+                        minStart, startKey = diffStart, v
+                    if diffEnd < minEnd:
+                        minEnd, endKey = diffEnd, v
+
+                print(startKey, endKey)
                 # Find the shortest path
+                print("Generating path.")
                 path = least_cost_path(edmonton_graph, startKey, endKey, cost).reverse()
-
+                print("Path generation complete")
+                print(path)
                 # Create formatted output string for the client
                 length = 'N ' + ' ' + str(len(path)) + '\n'
                 ser.write(length)
+                print("Writing number of waypoints to serial.")
 
                 state = states.ACK  # Proceed to wait on acknowledgement
 
@@ -158,6 +174,7 @@ def finite_state_machine(edmonton_graph, location):
                 # Format output to the client
                 waypoint = 'W' + ' ' + str(location[next][0]) + ' ' + str(location[next][1]) + '\n'
                 ser.write(waypoint)
+                print("Sending waypoint to client.")
 
             if state == states.END:
                 ser.write('E\n')
@@ -166,5 +183,4 @@ def finite_state_machine(edmonton_graph, location):
 
 if __name__ == "__main__":
     edmonton_graph, location = load_edmonton_graph("edmonton-roads-2.0.1.txt")
-
     finite_state_machine(edmonton_graph, location)

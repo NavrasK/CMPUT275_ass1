@@ -186,6 +186,15 @@ int main() {
         // and then communicate with the server to get the path
         end = get_cursor_lonlat();
 
+        Serial.print("R ");
+        Serial.print(start.lon);
+        Serial.print(" ");
+        Serial.print(start.lat);
+        Serial.print(" ");
+        Serial.print(end.lon);
+        Serial.print(" ");
+        Serial.println(end.lat);
+
         int32_t * message; // pointer to an array of 32bit integers of the message
         int time = millis(); // Timer for timeout
 
