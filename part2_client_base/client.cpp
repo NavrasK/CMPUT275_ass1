@@ -93,8 +93,8 @@ void process_input() {
 
 //
 int32_t * readMessage() {
-    // At most 5 numbers, identifier (ASCII), lon/lat of two points
-    static int32_t message[5];
+    // At most 3 numbers, identifier (ASCII), lon/lat of a waypoint
+    static int32_t message[3];
     // each number will be at most 10 digits long, char for easier concatination
     char num[10];
     // Constants to split or identify message
@@ -201,14 +201,25 @@ int main() {
 
             shared.num_waypoints = *(message + 1);
 
-            for(int i = 0; i < shared.num_waypoints, i++) {
-                lon_lat_32 wp1, wp2;
+            for(int i = 0; i <= shared.num_waypoints; i++) {
+                lon_lat_32 wp;
                 time = millis();
                 while(true) {
                     if(millis() > time + 1000) {
                         break;
                     }
-                    message = readMessage
+                    if(Serial.available()) {
+                        message = readMessage();
+                        break;
+                    }
+                }
+                if (*message == 87) {
+                    wp.lon = *(message + 1);
+                    wp.lat = *(message + 2);
+                    shared.waypoints[i] = wp;
+                }
+                if (*message == 69) {
+                    break;
                 }
             }
 
