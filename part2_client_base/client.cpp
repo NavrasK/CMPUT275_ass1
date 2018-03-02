@@ -91,6 +91,47 @@ void process_input() {
   }
 }
 
+//
+int32_t * readMessage() {
+    // At most 5 numbers, identifier (ASCII), lon/lat of two points
+    static int32_t message[5];
+    // each number will be at most 10 digits long, char for easier concatination
+    char num[10];
+    // Constants to split or identify message
+    const int nl = 10, spc = 32, n = 78, w = 87, e = 69;
+    int recievedByte;
+    int i = 0; // message index
+    int j = 0; // number index
+
+    while(Serial.available() > 0) {
+        recievedByte = Serial.read();
+        // If the first byte is not an identifier, return null pointer
+        if(i == 0 && (recievedByte != n || recievedByte != w || recievedByte != e)) {
+            return NULL;
+        }
+        // If byte is one of the identifying characters, store ascii as the first num
+        else if(recievedByte == n || recievedByte == w || recievedByte == e) {
+            message[i++] = (int32_t) recievedByte;
+        }
+        // if the byte is a space, split into new number
+        else if(recievedByte == spc) {
+            num[j] = '\0'; // set final char to null terminator
+            message[i++] = (int32_t) num; // append the number to the message
+            j = 0; // reset the number index to build new number
+        }
+        // if the byte is any other character, append to number string
+        else if(recievedByte != nl){
+            num[j++] = (char) recievedByte;
+        }
+        // if newline character, append the last number and return
+        else {
+            num[j] = '\0'; // set final char to null terminator
+            message[i] = (int32_t) num; // append the number to the message
+            return message; // return pointer to the array
+        }
+    }
+}
+
 int main() {
   setup();
 
@@ -145,29 +186,32 @@ int main() {
         // and then communicate with the server to get the path
         end = get_cursor_lonlat();
 
-        Serial.print("R ");
-        Serial.print(start.lon);
-        Serial.print(" ");
-        Serial.print(start.lat);
-        Serial.print(" ");
-        Serial.print(end.lon);
-        Serial.print(" ");
-        Serial.println(end.lat);
+        int32_t * message; // pointer to an array of 32bit integers of the message
+        int time = millis(); // Timer for timeout
 
-        int time = millis()
         while(true){
-            if(millis() > time + 10000) {
-                break;
-            }
-            if(Serial.available()){
-                char* message = Serial.read();
-                if(message[0] != "N") {
+                if(millis() > time + 10000) {
                     break;
                 }
-
-                shared.num_waypoints =
+                if(Serial.available()) {
+                    message = readMessage();
+                    break;
+                }
             }
-        }
+
+            shared.num_waypoints = *(message + 1);
+
+            for(int i = 0; i < shared.num_waypoints, i++) {
+                lon_lat_32 wp1, wp2;
+                time = millis();
+                while(true) {
+                    if(millis() > time + 1000) {
+                        break;
+                    }
+                    message = readMessage
+                }
+            }
+
         // now we have stored the path length in
         // shared.num_waypoints and the waypoints themselves in
         // the shared.waypoints[] array, switch back to asking for the

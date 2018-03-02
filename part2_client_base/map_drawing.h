@@ -30,8 +30,6 @@ void draw_map();
 void erase_cursor();
 void draw_cursor();
 
-void draw_path();
-
 // given x/y values, shift the display over that many "units"
 // e.g. if shift is (1, 0) will shift over by half of a screen
 void shift_map_display(const xy_pos& shift);

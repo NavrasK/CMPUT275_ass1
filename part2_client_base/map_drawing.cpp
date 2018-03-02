@@ -114,11 +114,6 @@ void draw_cursor() {
   shared.tft->fillCircle(cursor_disp.x, cursor_disp.y, mapdata::dot_radius, ILI9341_RED);
 }
 
-// path draw
-void draw_path() {
-    //  TODO: Not really sure how waypoints are stored.. wish I had a tuple
-}
-
 // given a pair of x/y shifts, will shift the display over that many
 // "half screens"
 // example: if shift.x = 1 then the map screen is nudged to the east
